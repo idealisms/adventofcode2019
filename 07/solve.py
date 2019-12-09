@@ -81,70 +81,69 @@ class Amplifier(object):
   def __init__(self, phase, mem):
     self.phase = phase
     self.ip = 0
-    self.mem = mem
+    self.mem = mem[:]
     self.run(phase)
+
+  def get_opcode_and_modes(self):
+    n = self.mem[self.ip]
+    modes = n / 100
+    opcode = n % 100
+    # Return 3 modes (up to 3 params).
+    return opcode, [modes % 10, (modes / 10) % 10, (modes / 100) % 10]
+
+  def read_params(self, num_params, modes):
+    params = []
+    for offset in xrange(1, num_params + 1):
+      params.append(self.mem[self.mem[self.ip+offset]] if modes[offset-1] == 0
+                    else self.mem[self.ip+offset])
+    return params
 
   def run(self, inp):
     while True:
-      opcode, mode = get_opcode_and_modes(self.mem[self.ip])
+      opcode, modes = self.get_opcode_and_modes()
       if opcode == 99:
-        print self.phase, 'exit'
+        print '[Phase {}] Exiting'.format(self.phase)
         raise StopIteration()
 
-      #print self.mem[self.ip], opcode, mode
+      #print self.mem[self.ip], opcode, modes
 
       if opcode == 1:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
+        p1, p2 = self.read_params(2, modes)
         self.mem[self.mem[self.ip+3]] = p1 + p2
-        # print ' ', p1, p2
         self.ip += 4
       elif opcode == 2:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
+        p1, p2 = self.read_params(2, modes)
         self.mem[self.mem[self.ip+3]] = p1 * p2
         self.ip += 4
       elif opcode == 3:
         if inp is None:
-          print 'waiting for input'
+          print '[Phase {}] Waiting for input'.format(self.phase)
           return
         self.mem[self.mem[self.ip+1]] = inp
         inp = None
         self.ip += 2
       elif opcode == 4:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        print 'ouput:', p1
+        p1, = self.read_params(1, modes)
+        print '[Phase {}] Output:'.format(self.phase), p1
         output = p1
         self.ip += 2
         return output
       elif opcode == 5:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
-        if p1 != 0:
-          self.ip = p2
-        else:
-          self.ip += 3
+        p1, p2 = self.read_params(2, modes)
+        self.ip = p2 if p1 != 0 else 3
       elif opcode == 6:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
-        if p1 == 0:
-          self.ip = p2
-        else:
-          self.ip += 3
+        p1, p2 = self.read_params(2, modes)
+        self.ip = p2 if p1 == 0 else 3
       elif opcode == 7:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
+        p1, p2 = self.read_params(2, modes)
         self.mem[self.mem[self.ip+3]] = 1 if p1 < p2 else 0
         self.ip += 4
       elif opcode == 8:
-        p1 = self.mem[self.mem[self.ip+1]] if mode[0] == 0 else self.mem[self.ip+1]
-        p2 = self.mem[self.mem[self.ip+2]] if mode[1] == 0 else self.mem[self.ip+2]
+        p1, p2 = self.read_params(2, modes)
         self.mem[self.mem[self.ip+3]] = 1 if p1 == p2 else 0
         self.ip += 4
       else:
-        print opcode
-        raise Exception('Unexpected value')
-
+        raise Exception('Unexpected opcode: {}'.format(opcode))
 
 
 #mem_orig = map(int, '3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5'.split(','))
@@ -152,11 +151,11 @@ class Amplifier(object):
 best = 0
 for order in itertools.permutations(range(5, 10)):
   mem = mem_orig[:]
-  a = Amplifier(order[0], mem_orig[:])
-  b = Amplifier(order[1], mem_orig[:])
-  c = Amplifier(order[2], mem_orig[:])
-  d = Amplifier(order[3], mem_orig[:])
-  e = Amplifier(order[4], mem_orig[:])
+  a = Amplifier(order[0], mem_orig)
+  b = Amplifier(order[1], mem_orig)
+  c = Amplifier(order[2], mem_orig)
+  d = Amplifier(order[3], mem_orig)
+  e = Amplifier(order[4], mem_orig)
   output = 0
   print order
   try:
