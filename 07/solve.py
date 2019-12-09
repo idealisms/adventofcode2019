@@ -130,10 +130,10 @@ class Amplifier(object):
         return output
       elif opcode == 5:
         p1, p2 = self.read_params(2, modes)
-        self.ip = p2 if p1 != 0 else 3
+        self.ip = p2 if p1 != 0 else self.ip+3
       elif opcode == 6:
         p1, p2 = self.read_params(2, modes)
-        self.ip = p2 if p1 == 0 else 3
+        self.ip = p2 if p1 == 0 else self.ip+3
       elif opcode == 7:
         p1, p2 = self.read_params(2, modes)
         self.mem[self.mem[self.ip+3]] = 1 if p1 < p2 else 0
