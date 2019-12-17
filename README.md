@@ -8,6 +8,7 @@ My personal stats:
 ```
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+ 14       >24h  7461      0       >24h  7017      0  # Out of town.
  13   02:01:07  3046      0       >24h  7809      0  # Out of town, started late.
  12   00:21:34   544      0   00:50:07   260      0
  11   00:15:00   216      0   00:37:18   687      0
