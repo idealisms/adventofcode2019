@@ -163,6 +163,3 @@ while True:
     last_y_delivered_by_nat = nat[2]
     out = computers[0].run(nat[2])
     handle_out(out, 255)
-
-  # else:
-  #   queue.append([addr, None, None])
