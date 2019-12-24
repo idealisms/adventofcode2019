@@ -8,6 +8,7 @@ My personal stats:
 ```
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+ 24   02:27:08  1240      0   03:27:17   832      0  # Out of town. Started ~02:05
  23   00:27:01   343      0   00:43:01   328      0
  22   00:21:01   302      0   13:42:12  1031      0  # Looked up the solution to part 2.
  21   00:26:37   284      0   01:23:22   480      0
